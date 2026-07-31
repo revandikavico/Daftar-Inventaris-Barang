@@ -85,3 +85,6 @@ InventarisBarang/
 - **Material3 Dynamic Color** (Android 12+)
 - **Snackbar** sebagai notifikasi aksi
 - **AlertDialog** untuk konfirmasi hapus
+
+
+![Image Alt]
