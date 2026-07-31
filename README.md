@@ -88,6 +88,6 @@ InventarisBarang/
 
 
 ![Image Alt](https://github.com/revandikavico/Daftar-Inventaris-Barang/blob/f5293ffca4f45c7d84cdd1b2648300b03e643c69/WhatsApp%20Image%202026-08-01%20at%2002.36.20.jpeg)
+![Image Alt](https://github.com/revandikavico/Daftar-Inventaris-Barang/blob/2824a52fc156a9785f055bbcadb146304b7dca6c/WhatsApp%20Image%202026-08-01%20at%2002.36.21%20(1).jpeg)
 ![Image Alt](
-
-![Image Alt](
+)
