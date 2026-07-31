@@ -1,453 +1,12 @@
-/*
 package com.example.inventarisbarang.screen
 
 import android.net.Uri
+import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Search
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
-import androidx.compose.ui.tooling.preview.Preview
-import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.navigation.NavHostController
-import androidx.navigation.compose.rememberNavController
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
-import com.example.inventarisbarang.data.BarangRepository
-import com.example.inventarisbarang.model.Barang
-import java.text.NumberFormat
-import java.util.Locale
-
-*/
-/**
- * DaftarBarangScreen menampilkan daftar semua barang dalam bentuk card yang bisa di-scroll.
- *
- * Analogi: Seperti etalase toko online — semua barang ditampilkan dalam
- * kotak-kotak (card) yang bisa di-scroll vertikal. Setiap card menampilkan
- * gambar thumbnail, nama, kategori, harga, dan badge stok.
- *
- * Komponen utama:
- * ┌─────────────────────────────────────────────┐
- * │  TopAppBar: "Inventaris Barang" + [🔍]      │ ← Search toggle
- * ├─────────────────────────────────────────────┤
- * │                                             │
- * │  ┌─────┐  Tas Ransel Premium                │
- * │  │ IMG │  Aksesoris                         │ ← Card item
- * │  │     │  Rp245.000  [Stok: 24]        ›    │
- * │  └─────┘                                    │
- * │                                             │
- * │  ┌─────┐  Smartphone X200                   │
- * │  │ IMG │  Elektronik                        │ ← Card item
- * │  │     │  Rp3.500.000  [Stok: 5]       ›    │
- * │  └─────┘                                    │
- * │                                             │
- * │                                    ┌───┐    │
- * │                                    │ + │    │ ← FAB
- * │                                    └───┘    │
- * │  ┌──────────────────────────────────────┐   │
- * │  │  Snackbar: pesan notifikasi          │   │ ← Snackbar
- * │  └──────────────────────────────────────┘   │
- * └─────────────────────────────────────────────┘
- *
- * @param navController Controller navigasi untuk berpindah screen
- *//*
-
-@OptIn(ExperimentalMaterial3Api::class)
-@Composable
-fun DaftarBarangScreen(navController: NavHostController) {
-    // Context Android dibutuhkan untuk mengakses SharedPreferences
-    val context = LocalContext.current
-
-    // Inisialisasi repository (remember agar tidak dibuat ulang saat recomposition)
-    val repository = remember { BarangRepository(context) }
-
-    // === STATES ===
-    // mutableStateOf = state yang jika berubah, otomatis me-trigger recomposition
-
-    // Daftar barang yang ditampilkan
-    var daftarBarang by remember { mutableStateOf(repository.getSemuaBarang()) }
-
-    // Teks pencarian yang diketik user
-    var searchQuery by remember { mutableStateOf("") }
-
-    // Apakah search bar sedang aktif/terbuka
-    var isSearchActive by remember { mutableStateOf(false) }
-
-    // SnackbarHostState untuk menampilkan pesan notifikasi di bawah
-    val snackbarHostState = remember { SnackbarHostState() }
-
-    // Filter daftar barang berdasarkan query pencarian
-    // contains(ignoreCase = true) = pencarian tidak case-sensitive
-    val filteredBarang = if (searchQuery.isEmpty()) {
-        daftarBarang
-    } else {
-        daftarBarang.filter {
-            it.nama.contains(searchQuery, ignoreCase = true) ||
-            it.kategori.contains(searchQuery, ignoreCase = true)
-        }
-    }
-
-    */
-/**
-     * LaunchedEffect(navController.currentBackStackEntry) akan dijalankan
-     * setiap kali user kembali ke screen ini dari screen lain.
-     *
-     * Ini memastikan daftar barang selalu fresh setelah:
-     * - Menambah barang baru (dari TambahBarangScreen)
-     * - Mengedit barang (dari TambahBarangScreen mode edit)
-     * - Menghapus barang (dari DetailBarangScreen)
-     *//*
-
-    LaunchedEffect(navController.currentBackStackEntry) {
-        daftarBarang = repository.getSemuaBarang()
-    }
-
-    // === SCAFFOLD ===
-    // Scaffold adalah kerangka layout Material3 yang menyediakan
-    // slot untuk TopBar, Content, FAB, Snackbar, dan BottomBar
-    Scaffold(
-        // === TOP APP BAR ===
-        topBar = {
-            TopAppBar(
-                title = {
-                    if (isSearchActive) {
-                        // Mode pencarian: tampilkan TextField untuk mengetik query
-                        OutlinedTextField(
-                            value = searchQuery,
-                            onValueChange = { searchQuery = it },
-                            placeholder = {
-                                Text(
-                                    "Cari nama atau kategori...",
-                                    fontSize = 14.sp
-                                )
-                            },
-                            singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
-                            )
-                        )
-                    } else {
-                        // Mode normal: tampilkan judul aplikasi
-                        Text("Inventaris Barang")
-                    }
-                },
-                actions = {
-                    // Tombol toggle search di kanan atas TopAppBar
-                    IconButton(onClick = {
-                        isSearchActive = !isSearchActive
-                        // Reset query saat search ditutup
-                        if (!isSearchActive) searchQuery = ""
-                    }) {
-                        Icon(
-                            // Ganti ikon sesuai state: search ↔ close
-                            imageVector = if (isSearchActive) Icons.Default.Close
-                                          else Icons.Default.Search,
-                            contentDescription = if (isSearchActive) "Tutup Pencarian"
-                                                 else "Cari Barang"
-                        )
-                    }
-                },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
-                )
-            )
-        },
-
-        // === FLOATING ACTION BUTTON ===
-        // Tombol melayang di kanan bawah untuk menambah barang baru
-        floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    // Navigasi ke screen Tambah Barang
-                    navController.navigate("tambah")
-                },
-                containerColor = MaterialTheme.colorScheme.primary
-            ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = "Tambah Barang",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
-            }
-        },
-
-        // === SNACKBAR HOST ===
-        // Tempat di mana Snackbar akan muncul (bagian bawah layar)
-        snackbarHost = { SnackbarHost(snackbarHostState) }
-
-    ) { paddingValues ->
-        // Tampilkan konten berdasarkan tab yang dipilih
-        if (selectedTab == 1) {
-            // Screen Kategori (Modern dengan Grid)
-            KategoriScreen(paddingValues = paddingValues)
-        } else {
-            // Screen Beranda (Daftar Barang) dan Profil (Placeholder)
-            if (filteredBarang.isEmpty()) {
-            // === STATE KOSONG ===
-            // Tampilkan pesan ketika tidak ada barang
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentAlignment = Alignment.Center
-            ) {
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Text(
-                        text = if (searchQuery.isEmpty()) "Belum ada barang"
-                               else "Barang \"$searchQuery\" tidak ditemukan",
-                        style = MaterialTheme.typography.bodyLarge,
-                        color = MaterialTheme.colorScheme.onSurfaceVariant
-                    )
-                    if (searchQuery.isEmpty()) {
-                        Spacer(modifier = Modifier.height(8.dp))
-                        Text(
-                            text = "Tap tombol + untuk menambah barang baru",
-                            style = MaterialTheme.typography.bodyMedium,
-                            color = MaterialTheme.colorScheme.outline
-                        )
-                    }
-                }
-            }
-        } else {
-            // === DAFTAR BARANG ===
-            // LazyColumn = versi Compose dari RecyclerView
-            // HANYA me-render item yang terlihat di layar (sangat efisien memori)
-            // Jika ada 1000 barang, hanya 5-10 yang di-render sekaligus
-            LazyColumn(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(paddingValues),
-                contentPadding = PaddingValues(16.dp),       // Padding di tepi list
-                verticalArrangement = Arrangement.spacedBy(12.dp)  // Jarak antar card
-            ) {
-                items(
-                    items = filteredBarang,
-                    key = { it.id }   // Key unik agar Compose bisa melacak perubahan
-                ) { barang ->
-                    // Render satu card barang
-                    BarangCard(
-                        barang = barang,
-                        onClick = {
-                            // Klik card → navigasi ke Detail Barang
-                            navController.navigate("detail/${barang.id}")
-                        }
-                    )
-                }
-            }
-        }
-    }
-}
-}
-}
-
-// =====================================================
-// KOMPONEN: BarangCard
-// =====================================================
-
-*/
-/**
- * BarangCard adalah komponen card untuk menampilkan satu item barang di daftar.
- *
- * Analogi: Seperti satu "kartu produk" di Tokopedia/Shopee —
- * menampilkan thumbnail gambar, nama, kategori, harga, dan stok.
- *
- * Layout:
- * ┌──────────────────────────────────────────────┐
- * │ ┌──────┐  Nama Barang                        │
- * │ │      │  Kategori                           │
- * │ │ IMG  │  Rp245.000  [Stok: 24]         ›    │
- * │ └──────┘                                     │
- * └──────────────────────────────────────────────┘
- *
- * @param barang Data barang yang ditampilkan
- * @param onClick Callback saat card diklik (navigasi ke detail)
- *//*
-
-@Composable
-fun BarangCard(barang: Barang, onClick: () -> Unit) {
-    Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),   // Seluruh card area bisa diklik
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
-    ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // === GAMBAR / PLACEHOLDER ===
-            if (barang.gambarUri.isNotEmpty()) {
-                // Ada gambar: load dari URI menggunakan Coil (AsyncImage)
-                // Coil bekerja secara asinkron — tidak memblokir UI saat loading
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(Uri.parse(barang.gambarUri))   // Parse String URI ke Uri object
-                        .crossfade(true)                      // Efek transisi halus
-                        .build(),
-                    contentDescription = barang.nama,
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clip(RoundedCornerShape(8.dp)),     // Rounded corners pada gambar
-                    contentScale = ContentScale.Crop           // Crop agar gambar pas di kotak
-                )
-            } else {
-                // Tidak ada gambar: tampilkan placeholder dengan inisial nama
-                Surface(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    color = MaterialTheme.colorScheme.primaryContainer
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = barang.nama.take(1).uppercase(),  // Huruf pertama, kapital
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // === INFORMASI BARANG ===
-            Column(modifier = Modifier.weight(1f)) {
-                // Nama barang (max 1 baris, overflow = "...")
-                Text(
-                    text = barang.nama,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                // Kategori barang
-                Text(
-                    text = barang.kategori,
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                // Harga + Badge stok
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Harga diformat ke Rupiah Indonesia
-                    Text(
-                        text = formatRupiah(barang.harga),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-
-                    // Badge stok — warna merah jika stok ≤ 5 (rendah)
-                    Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = if (barang.stok <= 5)
-                            MaterialTheme.colorScheme.errorContainer   // Merah muda
-                        else
-                            MaterialTheme.colorScheme.secondaryContainer // Ungu muda
-                    ) {
-                        Text(
-                            text = "Stok: ${barang.stok}",
-                            fontSize = 11.sp,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            color = if (barang.stok <= 5)
-                                MaterialTheme.colorScheme.onErrorContainer
-                            else
-                                MaterialTheme.colorScheme.onSecondaryContainer
-                        )
-                    }
-                }
-            }
-
-            // Panah kanan sebagai affordance (indikator "bisa diklik")
-            Text(
-                text = "›",
-                fontSize = 24.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
-        }
-    }
-}
-
-// =====================================================
-// HELPER FUNCTION
-// =====================================================
-
-*/
-/**
- * Memformat angka Double ke format mata uang Rupiah Indonesia.
- *
- * Contoh:
- * - 245000.0   → "Rp245.000"
- * - 3500000.0  → "Rp3.500.000"
- * - 0.0        → "Rp0"
- *
- * NumberFormat.getCurrencyInstance(Locale("id", "ID")) menggunakan
- * aturan format mata uang Indonesia:
- * - Simbol: "Rp"
- * - Pemisah ribuan: titik (.)
- * - Pemisah desimal: koma (,)
- *
- * @param amount Jumlah uang dalam Double
- * @return String format Rupiah tanpa desimal
- *//*
-
-fun formatRupiah(amount: Double): String {
-    val format = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
-    format.maximumFractionDigits = 0  // Tanpa angka di belakang koma
-    return format.format(amount)
-}
-
-// =====================================================
-// PREVIEW
-// =====================================================
-
-@Preview(showBackground = true, name = "Daftar Barang - Light")
-@Composable
-fun PreviewDaftarBarangScreenLight() {
-    MaterialTheme {
-        DaftarBarangScreen(navController = rememberNavController())
-    }
-}
-*/
-package com.example.inventarisbarang.screen
-
-import android.net.Uri
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
@@ -462,8 +21,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
@@ -473,73 +35,28 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
+import com.example.inventarisbarang.R
 import com.example.inventarisbarang.data.BarangRepository
 import com.example.inventarisbarang.model.Barang
 import java.text.NumberFormat
 import java.util.Locale
 
 /**
- * DaftarBarangScreen menampilkan daftar semua barang dalam bentuk card yang bisa di-scroll.
- *
- * Analogi: Seperti etalase toko online — semua barang ditampilkan dalam
- * kotak-kotak (card) yang bisa di-scroll vertikal. Setiap card menampilkan
- * gambar thumbnail, nama, kategori, harga, dan badge stok.
- *
- * Komponen utama:
- * ┌─────────────────────────────────────────────┐
- * │  TopAppBar: "Inventaris Barang" + [🔍]      │ ← Search toggle
- * ├─────────────────────────────────────────────┤
- * │                                             │
- * │  ┌─────┐  Tas Ransel Premium                │
- * │  │ IMG │  Aksesoris                         │ ← Card item
- * │  │     │  Rp245.000  [Stok: 24]        ›    │
- * │  └─────┘                                    │
- * │                                             │
- * │  ┌─────┐  Smartphone X200                   │
- * │  │ IMG │  Elektronik                        │ ← Card item
- * │  │     │  Rp3.500.000  [Stok: 5]       ›    │
- * │  └─────┘                                    │
- * │                                             │
- * │                                    ┌───┐    │
- * │                                    │ + │    │ ← FAB
- * │                                    └───┘    │
- * │  ┌──────────────────────────────────────┐   │
- * │  │  Snackbar: pesan notifikasi          │   │ ← Snackbar
- * │  └──────────────────────────────────────┘   │
- * └─────────────────────────────────────────────┘
- *
- * @param navController Controller navigasi untuk berpindah screen
+ * DaftarBarangScreen (StockFlow Edition)
+ * Menampilkan barang dalam format Grid 2 kolom yang modern.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun DaftarBarangScreen(navController: NavHostController) {
-    // Context Android dibutuhkan untuk mengakses SharedPreferences
     val context = LocalContext.current
-
-    // Inisialisasi repository (remember agar tidak dibuat ulang saat recomposition)
     val repository = remember { BarangRepository(context) }
 
-    // === STATES ===
-    // mutableStateOf = state yang jika berubah, otomatis me-trigger recomposition
-
-    // Daftar barang yang ditampilkan
     var daftarBarang by remember { mutableStateOf(repository.getSemuaBarang()) }
-
-    // Teks pencarian yang diketik user
     var searchQuery by remember { mutableStateOf("") }
-
-    // Apakah search bar sedang aktif/terbuka
     var isSearchActive by remember { mutableStateOf(false) }
-
-    // SnackbarHostState untuk menampilkan pesan notifikasi di bawah
     val snackbarHostState = remember { SnackbarHostState() }
-
-    // State untuk tab yang aktif di BottomNavigationBar
-    // 0 = Beranda, 1 = Kategori, 2 = Profil
     var selectedTab by remember { mutableIntStateOf(0) }
 
-    // Filter daftar barang berdasarkan query pencarian
-    // contains(ignoreCase = true) = pencarian tidak case-sensitive
     val filteredBarang = if (searchQuery.isEmpty()) {
         daftarBarang
     } else {
@@ -549,401 +66,170 @@ fun DaftarBarangScreen(navController: NavHostController) {
         }
     }
 
-    /**
-     * LaunchedEffect(navController.currentBackStackEntry) akan dijalankan
-     * setiap kali user kembali ke screen ini dari screen lain.
-     *
-     * Ini memastikan daftar barang selalu fresh setelah:
-     * - Menambah barang baru (dari TambahBarangScreen)
-     * - Mengedit barang (dari TambahBarangScreen mode edit)
-     * - Menghapus barang (dari DetailBarangScreen)
-     */
     LaunchedEffect(navController.currentBackStackEntry) {
         daftarBarang = repository.getSemuaBarang()
     }
 
-    // === SCAFFOLD ===
-    // Scaffold adalah kerangka layout Material3 yang menyediakan
-    // slot untuk TopBar, Content, FAB, Snackbar, dan BottomBar
     Scaffold(
-        // === TOP APP BAR ===
         topBar = {
-            TopAppBar(
+            CenterAlignedTopAppBar(
                 title = {
                     if (isSearchActive) {
-                        // Mode pencarian: tampilkan TextField untuk mengetik query
-                        OutlinedTextField(
+                        TextField(
                             value = searchQuery,
                             onValueChange = { searchQuery = it },
-                            placeholder = {
-                                Text(
-                                    "Cari nama atau kategori...",
-                                    fontSize = 14.sp
-                                )
-                            },
+                            placeholder = { Text("Cari stok...") },
                             singleLine = true,
-                            modifier = Modifier.fillMaxWidth(),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                unfocusedBorderColor = MaterialTheme.colorScheme.outline
+                            modifier = Modifier.fillMaxWidth().padding(end = 16.dp),
+                            colors = TextFieldDefaults.colors(
+                                focusedContainerColor = Color.Transparent,
+                                unfocusedContainerColor = Color.Transparent
                             )
                         )
                     } else {
-                        // Mode normal: tampilkan judul aplikasi
-                        Text("Inventaris Barang")
+                        Text(
+                            text = stringResource(R.string.app_name),
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 1.sp
+                        )
                     }
                 },
                 actions = {
-                    // Tombol toggle search di kanan atas TopAppBar
                     IconButton(onClick = {
                         isSearchActive = !isSearchActive
-                        // Reset query saat search ditutup
                         if (!isSearchActive) searchQuery = ""
                     }) {
                         Icon(
-                            // Ganti ikon sesuai state: search ↔ close
-                            imageVector = if (isSearchActive) Icons.Default.Close
-                            else Icons.Default.Search,
-                            contentDescription = if (isSearchActive) "Tutup Pencarian"
-                            else "Cari Barang"
+                            imageVector = if (isSearchActive) Icons.Default.Close else Icons.Default.Search,
+                            contentDescription = null
                         )
                     }
                 },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primaryContainer,
-                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                colors = TopAppBarDefaults.centerAlignedTopAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.surface
                 )
             )
         },
-
-        // === FLOATING ACTION BUTTON ===
-        // Tombol melayang di kanan bawah untuk menambah barang baru
         floatingActionButton = {
-            FloatingActionButton(
-                onClick = {
-                    // Navigasi ke screen Tambah Barang
-                    navController.navigate("tambah")
-                },
-                containerColor = MaterialTheme.colorScheme.primary
+            LargeFloatingActionButton(
+                onClick = { navController.navigate("tambah") },
+                containerColor = MaterialTheme.colorScheme.primary,
+                shape = RoundedCornerShape(24.dp)
             ) {
-                Icon(
-                    Icons.Default.Add,
-                    contentDescription = "Tambah Barang",
-                    tint = MaterialTheme.colorScheme.onPrimary
-                )
+                Icon(Icons.Default.Add, contentDescription = null, modifier = Modifier.size(32.dp))
             }
         },
-
-        // === BOTTOM NAVIGATION BAR ===
-        // Bar navigasi di bagian bawah layar dengan 3 menu utama
-        // Analogi: Seperti menu tab di bawah app Instagram/Tokopedia —
-        // user bisa berpindah antar halaman utama dengan satu tap.
-        //
-        // NavigationBar = komponen Material3 untuk bottom navigation
-        // NavigationBarItem = satu item/tab di dalam NavigationBar
         bottomBar = {
-            NavigationBar {
-                // --- Tab 1: Beranda ---
+            NavigationBar(
+                containerColor = MaterialTheme.colorScheme.surface,
+                tonalElevation = 8.dp
+            ) {
                 NavigationBarItem(
                     selected = selectedTab == 0,
                     onClick = { selectedTab = 0 },
-                    icon = {
-                        Icon(
-                            // Ikon berubah antara filled (aktif) dan outlined (non-aktif)
-                            imageVector = if (selectedTab == 0) Icons.Filled.Home
-                            else Icons.Outlined.Home,
-                            contentDescription = "Beranda"
-                        )
-                    },
-                    label = { Text("Beranda") }
+                    icon = { Icon(if (selectedTab == 0) Icons.Filled.Home else Icons.Outlined.Home, null) },
+                    label = { Text("Stok") }
                 )
-
-                // --- Tab 2: Kategori ---
                 NavigationBarItem(
                     selected = selectedTab == 1,
-                    onClick = {
-                        selectedTab = 1
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = Icons.Default.Search,
-                            contentDescription = "Kategori"
-                        )
-                    },
+                    onClick = { selectedTab = 1 },
+                    icon = { Icon(Icons.Default.Search, null) },
                     label = { Text("Kategori") }
                 )
-
-                // --- Tab 3: Profil ---
                 NavigationBarItem(
                     selected = selectedTab == 2,
-                    onClick = {
-                        selectedTab = 2
-                    },
-                    icon = {
-                        Icon(
-                            imageVector = if (selectedTab == 2) Icons.Filled.Person
-                            else Icons.Outlined.Person,
-                            contentDescription = "Profil"
-                        )
-                    },
+                    onClick = { selectedTab = 2 },
+                    icon = { Icon(if (selectedTab == 2) Icons.Filled.Person else Icons.Outlined.Person, null) },
                     label = { Text("Profil") }
                 )
             }
         },
-
-        // === SNACKBAR HOST ===
-        // Tempat di mana Snackbar akan muncul (di atas BottomBar)
         snackbarHost = { SnackbarHost(snackbarHostState) }
-
     ) { paddingValues ->
-        // Tampilkan konten berdasarkan tab yang dipilih
         when (selectedTab) {
-            1 -> {
-                // Screen Kategori (Modern dengan Grid)
-                KategoriScreen(paddingValues = paddingValues)
-            }
-            2 -> {
-                // Screen Profil (Informasi Admin)
-                ProfilScreen(
-                    paddingValues = paddingValues,
-                    navController = navController,
-                    daftarBarang = daftarBarang
-                )
-            }
+            1 -> KategoriScreen(paddingValues = paddingValues)
+            2 -> ProfilScreen(paddingValues, navController, daftarBarang)
             else -> {
-                // Screen Beranda (Daftar Barang)
                 if (filteredBarang.isEmpty()) {
-                    // === STATE KOSONG ===
-                    // Tampilkan pesan ketika tidak ada barang
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        contentAlignment = Alignment.Center
+                    Box(Modifier.fillMaxSize().padding(paddingValues), Alignment.Center) {
+                        Text("Stok kosong", color = MaterialTheme.colorScheme.outline)
+                    }
+                } else {
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        modifier = Modifier.fillMaxSize().padding(paddingValues),
+                        contentPadding = PaddingValues(16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(16.dp),
+                        verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
-                        Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                            Text(
-                                text = if (searchQuery.isEmpty()) "Belum ada barang"
-                                else "Barang \"$searchQuery\" tidak ditemukan",
-                                style = MaterialTheme.typography.bodyLarge,
-                                color = MaterialTheme.colorScheme.onSurfaceVariant
-                            )
-                            if (searchQuery.isEmpty()) {
-                                Spacer(modifier = Modifier.height(8.dp))
-                                Text(
-                                    text = "Tap tombol + untuk menambah barang baru",
-                                    style = MaterialTheme.typography.bodyMedium,
-                                    color = MaterialTheme.colorScheme.outline
-                                )
+                        items(filteredBarang, key = { it.id }) { barang ->
+                            StockCard(barang = barang) {
+                                navController.navigate("detail/${barang.id}")
                             }
                         }
                     }
-                } else {
-                    // === DAFTAR BARANG ===
-                    // LazyColumn = versi Compose dari RecyclerView
-                    LazyColumn(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues),
-                        contentPadding = PaddingValues(16.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp)
-                    ) {
-                        items(
-                            items = filteredBarang,
-                            key = { it.id }
-                        ) { barang ->
-                            // Render satu card barang
-                            BarangCard(
-                                barang = barang,
-                                onClick = {
-                                    // Klik card → navigasi ke Detail Barang
-                                    navController.navigate("detail/${barang.id}")
-                                }
-                            )
-                        }
-                    }
                 }
             }
         }
     }
 }
 
-// =====================================================
-// KOMPONEN: BarangCard
-// =====================================================
-
-/**
- * BarangCard adalah komponen card untuk menampilkan satu item barang di daftar.
- *
- * Analogi: Seperti satu "kartu produk" di Tokopedia/Shopee —
- * menampilkan thumbnail gambar, nama, kategori, harga, dan stok.
- *
- * Layout:
- * ┌──────────────────────────────────────────────┐
- * │ ┌──────┐  Nama Barang                        │
- * │ │      │  Kategori                           │
- * │ │ IMG  │  Rp245.000  [Stok: 24]         ›    │
- * │ └──────┘                                     │
- * └──────────────────────────────────────────────┘
- *
- * @param barang Data barang yang ditampilkan
- * @param onClick Callback saat card diklik (navigasi ke detail)
- */
 @Composable
-fun BarangCard(barang: Barang, onClick: () -> Unit) {
+fun StockCard(barang: Barang, onClick: () -> Unit) {
     Card(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clickable(onClick = onClick),   // Seluruh card area bisa diklik
-        shape = RoundedCornerShape(12.dp),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        colors = CardDefaults.cardColors(
-            containerColor = MaterialTheme.colorScheme.surface
-        )
+        modifier = Modifier.fillMaxWidth().clickable(onClick = onClick),
+        shape = RoundedCornerShape(24.dp),
+        colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f))
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            // === GAMBAR / PLACEHOLDER ===
-            if (barang.gambarUri.isNotEmpty()) {
-                // Ada gambar: load dari URI menggunakan Coil (AsyncImage)
-                // Coil bekerja secara asinkron — tidak memblokir UI saat loading
-                AsyncImage(
-                    model = ImageRequest.Builder(LocalContext.current)
-                        .data(Uri.parse(barang.gambarUri))   // Parse String URI ke Uri object
-                        .crossfade(true)                      // Efek transisi halus
-                        .build(),
-                    contentDescription = barang.nama,
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clip(RoundedCornerShape(8.dp)),     // Rounded corners pada gambar
-                    contentScale = ContentScale.Crop           // Crop agar gambar pas di kotak
-                )
-            } else {
-                // Tidak ada gambar: tampilkan placeholder dengan inisial nama
-                Surface(
-                    modifier = Modifier
-                        .size(72.dp)
-                        .clip(RoundedCornerShape(8.dp)),
-                    color = MaterialTheme.colorScheme.primaryContainer
-                ) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Text(
-                            text = barang.nama.take(1).uppercase(),  // Huruf pertama, kapital
-                            fontSize = 24.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.onPrimaryContainer
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.width(12.dp))
-
-            // === INFORMASI BARANG ===
-            Column(modifier = Modifier.weight(1f)) {
-                // Nama barang (max 1 baris, overflow = "...")
-                Text(
-                    text = barang.nama,
-                    fontWeight = FontWeight.SemiBold,
-                    fontSize = 16.sp,
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
-
-                Spacer(modifier = Modifier.height(2.dp))
-
-                // Kategori barang
-                Text(
-                    text = barang.kategori,
-                    fontSize = 13.sp,
-                    color = MaterialTheme.colorScheme.onSurfaceVariant
-                )
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                // Harga + Badge stok
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Harga diformat ke Rupiah Indonesia
-                    Text(
-                        text = formatRupiah(barang.harga),
-                        fontWeight = FontWeight.Bold,
-                        fontSize = 14.sp,
-                        color = MaterialTheme.colorScheme.primary
+        Column {
+            Box(modifier = Modifier.fillMaxWidth().height(140.dp)) {
+                if (barang.gambarUri.isNotEmpty()) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(LocalContext.current)
+                            .data(Uri.parse(barang.gambarUri))
+                            .crossfade(true).build(),
+                        contentDescription = null,
+                        modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(topStart = 24.dp, topEnd = 24.dp)),
+                        contentScale = ContentScale.Crop
                     )
-
-                    // Badge stok — warna merah jika stok ≤ 5 (rendah)
-                    Surface(
-                        shape = RoundedCornerShape(4.dp),
-                        color = if (barang.stok <= 5)
-                            MaterialTheme.colorScheme.errorContainer   // Merah muda
-                        else
-                            MaterialTheme.colorScheme.secondaryContainer // Ungu muda
+                } else {
+                    Box(
+                        Modifier.fillMaxSize().background(MaterialTheme.colorScheme.primaryContainer),
+                        Alignment.Center
                     ) {
-                        Text(
-                            text = "Stok: ${barang.stok}",
-                            fontSize = 11.sp,
-                            modifier = Modifier.padding(horizontal = 6.dp, vertical = 2.dp),
-                            color = if (barang.stok <= 5)
-                                MaterialTheme.colorScheme.onErrorContainer
-                            else
-                                MaterialTheme.colorScheme.onSecondaryContainer
-                        )
+                        Text(barang.nama.take(1), fontSize = 48.sp, fontWeight = FontWeight.Black, color = MaterialTheme.colorScheme.onPrimaryContainer)
                     }
+                }
+                
+                // Stock Badge
+                Surface(
+                    modifier = Modifier.padding(12.dp).align(Alignment.TopEnd),
+                    shape = RoundedCornerShape(12.dp),
+                    color = if (barang.stok <= 5) MaterialTheme.colorScheme.error else MaterialTheme.colorScheme.secondary,
+                    tonalElevation = 4.dp
+                ) {
+                    Text(
+                        text = "${barang.stok}",
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 4.dp),
+                        color = Color.White,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Bold
+                    )
                 }
             }
 
-            // Panah kanan sebagai affordance (indikator "bisa diklik")
-            Text(
-                text = "›",
-                fontSize = 24.sp,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
-            )
+            Column(Modifier.padding(16.dp)) {
+                Text(barang.nama, fontWeight = FontWeight.Bold, maxLines = 1, overflow = TextOverflow.Ellipsis)
+                Text(barang.kategori, style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.primary)
+                Spacer(Modifier.height(8.dp))
+                Text(formatRupiah(barang.harga), fontWeight = FontWeight.ExtraBold, color = MaterialTheme.colorScheme.onSurface)
+            }
         }
     }
 }
 
-// =====================================================
-// HELPER FUNCTION
-// =====================================================
-
-/**
- * Memformat angka Double ke format mata uang Rupiah Indonesia.
- *
- * Contoh:
- * - 245000.0   → "Rp245.000"
- * - 3500000.0  → "Rp3.500.000"
- * - 0.0        → "Rp0"
- *
- * NumberFormat.getCurrencyInstance(Locale("id", "ID")) menggunakan
- * aturan format mata uang Indonesia:
- * - Simbol: "Rp"
- * - Pemisah ribuan: titik (.)
- * - Pemisah desimal: koma (,)
- *
- * @param amount Jumlah uang dalam Double
- * @return String format Rupiah tanpa desimal
- */
 fun formatRupiah(amount: Double): String {
     val format = NumberFormat.getCurrencyInstance(Locale("id", "ID"))
-    format.maximumFractionDigits = 0  // Tanpa angka di belakang koma
+    format.maximumFractionDigits = 0
     return format.format(amount)
-}
-
-// =====================================================
-// PREVIEW
-// =====================================================
-
-@Preview(showBackground = true, name = "Daftar Barang - Light")
-@Composable
-fun PreviewDaftarBarangScreenLight() {
-    MaterialTheme {
-        DaftarBarangScreen(navController = rememberNavController())
-    }
 }

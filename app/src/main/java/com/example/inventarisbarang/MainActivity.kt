@@ -9,7 +9,7 @@ import androidx.compose.material3.Surface
 import androidx.compose.ui.Modifier
 import androidx.navigation.compose.rememberNavController
 import com.example.inventarisbarang.navigation.AppNavigation
-import com.example.inventarisbarang.ui.theme.InventarisBarangTheme
+import com.example.inventarisbarang.ui.theme.StockFlowTheme
 
 /**
  * MainActivity adalah titik masuk (entry point) aplikasi Android.
@@ -43,7 +43,7 @@ class MainActivity : ComponentActivity() {
         // Ini pengganti setContentView(R.layout.activity_main) di XML-based UI
         setContent {
             // Terapkan tema aplikasi (mendukung light/dark mode + dynamic color)
-            InventarisBarangTheme {
+            StockFlowTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     // Buat NavController yang "mengingat" posisi navigasi
                     // rememberNavController() memastikan controller bertahan
